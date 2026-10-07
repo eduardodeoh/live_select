@@ -97,7 +97,9 @@ export default {
                     } else {
                         this.setInputValue(null)
                     }
-                    if (input_event) {
+                    // a "select" delivered while the view rejoins comes from the new process's mount;
+                    // the form's own recovery carries the old values, so do not re-serialize the form now
+                    if (input_event && !this.rejoining) {
                         this.inputEvent(selection, mode)
                     }
                     if (parent_event) {
@@ -119,7 +121,11 @@ export default {
             this.maybeStyleClearButton()
             this.attachDomEventHandlers()
         },
+        disconnected() {
+            this.rejoining = true
+        },
         reconnected() {
+            this.rejoining = false
             if (this.selection && this.selection.length > 0) {
                 this.pushEventTo(this.el, "selection_recovery", this.selection)
             }
